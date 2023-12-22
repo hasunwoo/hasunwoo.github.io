@@ -339,7 +339,8 @@ where P: Pattern<'a>
 
 위의 문제를 해결하기 위해서는 문장이 끝난 뒤에도 `String::from("123.asdf")`에서 생성한 값이 해제되지 않아야 한다. 왜냐하면, 반환되는 `filename` 가 `&str`이고, 생성된 문자열에서 reborrow 하기 때문에다. 따라서, 문장이 끝난 후에 해제되지 않아야 한다.
 
-문자열을 할당한 다음, 분리된 문자열 슬라이드를 rebinding하여서 문제를 해결하였다.
+이 문제를 해결하려면 `String`객체를 `let`으로 변수에 binding하여 소유권을 명확하게 해야 한다.
+변수에 문자열을 binding 한 다음, 분리된 문자열 슬라이스를 같은 이름에 rebinding하여서 문제를 해결하였다.
 
 ```rust
 fn main() {
@@ -420,6 +421,7 @@ Shadowing에 대해 자세히 알아보고, 왜 쓰이고 어디에 쓰이는지
 
 1. Rust에서 Shadowing이란 이미 binding 되어있는 변수의 binding을 바꾸는 것이다.
 2. binding이 바뀌어도 해당 데이터의 lifetime과 borrowing rule은 해당 데이터가 생성된 scope의 영향을 받는다.
-3. Shadowing은 여러 단계의 연산 과정이 필요한 곳, mutability가 더이상 필요하지 않은 곳에서 쓰인다.
+3. 객체가 binding 되지 않고 문장의 실행 과정에서 생성된 경우, 임시 값으로 생성되어 해당 문장이 끝나면 바로 drop(해제)된다. 이는 메모리 누수를 방지하여 시스템 자원을 효율적으로 활용하고, 임시값을 즉시 해제하여 Ownership을 명확하게 한다.
+4. Shadowing은 여러 단계의 연산 과정이 필요한 곳, mutability가 더이상 필요하지 않은 곳에서 쓰인다.
 
 오늘은 variable shadowing에 대해 자세히 알아보았고, 다른 언어와는 다른 Rust의 특수성에 의한 사용법을 알아보았다. variable shadowing을 적재적소에 사용하면 보다 안전하고 가독성이 좋은 Rust 코드를 작성하는데 분명히 도움이 될 것이다.
