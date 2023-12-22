@@ -8,6 +8,7 @@
     - [기초 문법](./rust/syntax-related/README.md)
     - [기본 개념](./rust/basic-concepts/README.md)
     - [기능](./rust/features/README.md)
+        - [Shadowing의 이해와 활용](./rust/basic-concepts/231222-variable-shadowing.md)
     - [컴파일 에러](./rust/compile-error/README.md)
         - [반환 위치에서의 impl Trait VS Trait bounds](./rust/compile-error/231219-impl-vs-generics-at-return-position.md)
         - [Generic 매개변수의 lifetime 처리](./rust/compile-error/231220-generic-argument-lifetime.md)
