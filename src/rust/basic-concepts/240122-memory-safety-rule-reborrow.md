@@ -197,9 +197,9 @@ fn main() {
 
 위 코드를 분해해 보면 다음과 같다.
 
-### 1. `*a`: dereference operator이다. `deref()`가 호출되서 `str`이 된다. `str`은 크기가 유동적인 타입이라서 reference 형태로만 사용될 수 있다.
-### 2. `&(*deref())`: reference operator이다. `&str`이 된다.
-### 2. `deref()`: 결과적으로 `deref()`함수를 호출한 것과 같다.
+1. `*a`: dereference operator이다. `deref()`가 호출되서 `str`이 된다. `str`은 크기가 유동적인 타입이라서 reference 형태로만 사용될 수 있다.
+2. `&(*deref())`: reference operator이다. `&str`이 된다.
+2. `deref()`: 결과적으로 `deref()`함수를 호출한 것과 같다.
 
 대부분의 경우에는 `&*`을 사용할 일이 없을 것이다. 컴파일러는 똑똑하다. 그러나, 컴파일러가 defer coercion을 추론하지 못하는 특정 상황에서는 위의 방법을 사용해야 한다.
 `DerefMut`에 대해서 사용하려면 `&mut *a` 형태로 쓰면 된다. 이 방법은 `deref()` 또는 `deref_mut()`를 직접 호출하는것 보다 간결하게 사용할 수 있다.
