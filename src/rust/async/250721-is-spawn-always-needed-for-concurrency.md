@@ -180,6 +180,81 @@ tokio::select! {
 | 고정된 수의 sub-task | ❌ 불필요 | spawn 없이도 async block으로 충분 |
 
 
+## 리팩토링 예제 - 기존 코드를 다시 돌아보다
+
+### 리팩토링 전
+```rust
+async fn tcp_server_task() -> anyhow::Result<()> {
+    println!("listening...");
+    let listener = TcpListener::bind("0.0.0.0:28423").await?;
+
+    loop {
+        let (socket, _) = listener.accept().await?;
+        println!("new connection: {}", socket.peer_addr().unwrap());
+        tokio::spawn(process_socket(socket));
+    }
+}
+
+async fn process_socket(stream: TcpStream) {
+    let addr = stream.peer_addr().unwrap();
+    println!("start processing: {}", addr);
+    let (reader, writer) = stream.into_split();
+
+    let (packet_sender, packet_receiver) = mpsc::unbounded_channel::<Packet>();
+
+    let mut recv_task = tokio::task::spawn(process_recv(reader, packet_sender));
+    let mut send_task = tokio::task::spawn(process_send(writer, packet_receiver));
+
+    tokio::select! {
+        _ = &mut recv_task => send_task.abort(),
+        _ = &mut send_task => recv_task.abort(),
+    }
+
+    println!("terminated: {}", addr);
+}
+```
+
+
+### 리팩토링 후
+
+```rust
+async fn tcp_server_task() -> anyhow::Result<()> {
+    println!("listening...");
+    let listener = TcpListener::bind("0.0.0.0:28423").await?;
+
+    loop {
+        let (socket, _) = listener.accept().await?;
+        println!("new connection: {}", socket.peer_addr().unwrap());
+        // task가 동적으로 늘어나기 때문에 하드웨어 병렬성이 필요
+        // 또한 독립적으로 백그라운드에서 돌아야 하는 task임.
+        tokio::spawn(process_socket(socket));
+    }
+}
+
+async fn process_socket(stream: TcpStream) {
+    let addr = stream.peer_addr().unwrap();
+    println!("start processing: {}", addr);
+    let (reader, writer) = stream.into_split();
+
+    let (packet_sender, packet_receiver) = mpsc::unbounded_channel::<Packet>();
+
+    // 소켓 처리의 하위 task임. 갯수가 무한정으로 늘어나지 않기 때문에
+    // spawn 사용은 과할수 있음.
+    let recv_task = async { process_recv(reader, packet_sender).await };
+    let send_task = async { process_send(writer, packet_receiver).await };
+
+    tokio::select! {
+        _ = recv_task => {},
+        _ = send_task => {},
+    }
+
+    println!("terminated: {}", addr);
+}
+```
+
+내가 예전에 작성했던 잘 돌아가던 코드를 리팩토링 해 보았다. 앞으로는 `spawn`을 무분별하게 쓰지 않아야겠다.
+
+
 ## 느낀점
 
 1. 너무 복잡한거 같거나 이상한 느낌을 무시하지 말고 더 나은 방법을 고민하자.
