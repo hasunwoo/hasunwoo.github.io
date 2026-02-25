@@ -3,7 +3,6 @@ title = "Today I Learned - Knowledge Base"
 authors = ["Hasun Woo"]
 description = "What I learned about programming everyday."
 language = "en"
-multilingual = true
 src = "src"
 
 [output.html.playground]

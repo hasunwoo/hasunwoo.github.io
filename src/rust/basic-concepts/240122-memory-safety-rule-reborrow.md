@@ -215,4 +215,4 @@ fn main() {
 따라서, reborrowing에 대한 내용은 rust의 매모리 안전성 시스템을 이해하는데 매우 중요하다.
 
 ## 참고하면 좋을 학습자료
-* [함수의 선언부가 가지는 의미](./rust/tips/231220-meaning-of-function-signature.md)
+* [함수의 선언부가 가지는 의미](/rust/tips/231220-meaning-of-function-signature.md)
